@@ -102,7 +102,7 @@ for (var i = 0; i < 12; i++) {
 
 //设置地图行列数量
 var matrix = mold();
-var data = map(12, 12);
+var data = map(20, 12);
 render(data, gc);
 auto(400);
 
@@ -129,7 +129,7 @@ function map(r, c) {
 function render(data, gc) {
 
     var w = canvas.width / 12 - 10;
-    var h = canvas.height / 12 - 10;
+    var h = canvas.height / 20 - 10;
     var rLen = data.length;
     var cLen = data[0].length;
 
@@ -152,7 +152,7 @@ function create(arr) {
     for (var i = 0; i < arr.length; i++) {
         for (var j = 0; j < arr[i].length; j++) {
             if (!data[i + y][j + x]) {
-                data[i + y][j + x] = arr[i][j];
+                data[i + y ][j + x] = arr[i][j];
             }
         }
     }
@@ -217,17 +217,17 @@ function collideTest(matrix1) {
 }
 
 //检测左右碰撞
-function collideTestX(n) {
+function collideTestX(n,matrix1) {
     //左右移动的过程中，如果碰撞了边缘或着其他方块，就返回true，否则返回false
     //-1向左，1向右
-    var maxX = data[0].length - matrix[0].length;
+    var maxX = data[0].length - matrix1[0].length;
     if (x + n < 0 || x + n > maxX) {
         return true;
     }
     if (n === -1) {
-        for (var i = 0; i < matrix.length; i++) {
+        for (var i = 0; i < matrix1.length; i++) {
             var index = 0;
-            while (!matrix[i][index]) {
+            while (!matrix1[i][index]) {
                 index++;
             }
             if (!data[i + y] || data[i + y][x + index - 1]) {
@@ -235,9 +235,9 @@ function collideTestX(n) {
             }
         }
     } else if (n === 1) {
-        for (var i = 0; i < matrix.length; i++) {
-            var index = matrix[0].length;
-            while (!matrix[i][index]) {
+        for (var i = 0; i < matrix1.length; i++) {
+            var index = matrix1[0].length;
+            while (!matrix1[i][index]) {
                 index--;
             }
             if (!data[i + y] || data[i + y][x + index + 1]) {
@@ -261,6 +261,9 @@ function rotate() {
         for (var j = 0; j < x; j++) {
             arr[j][y - i - 1] = matrix[i][j];
         }
+    }
+    if(collideTest(arr)||collideTestX(1,arr)||collideTestX(-1,arr)){
+        return;
     }
     matrix = arr;
 }
@@ -293,14 +296,14 @@ function play() {
         switch (ev.keyCode) {
             case 37: //向左
                 clearPre(matrix);
-                if (!collideTestX(-1)) {
+                if (!collideTestX(-1,matrix)) {
                     x--;
                 }
                 create(matrix);
                 break;
             case 39: //向右
                 clearPre(matrix);
-                if (!collideTestX(1)) {
+                if (!collideTestX(1,matrix)) {
                     x++;
                 }
                 create(matrix);
@@ -309,12 +312,13 @@ function play() {
                 //先清除，再变形
                 clearPre(matrix);
                 rotate(matrix);
+                create(matrix);
                 break;
             case 40: //先下快速掉落
                 if (onOff) return;
                 onOff = true;
                 clearInterval(timer)
-                auto(100);
+                auto(50);
                 break;
         }
     }
